@@ -17,7 +17,7 @@ The Nuget package is available here : [https://www.nuget.org/packages/Messatsu.S
 
 # How to use it ? #
 
-SatsuiMemory is separated in two parts (in fact three, but we will se this later).  
+SatsuiMemory is separated in two parts (in fact three, but we will see this later).  
 First of all, you create a **Patch**.
 It contains all informations about memory operations, but do nothing.  
 Then you create a **MemApp** which will use the Patch created before and execute all instructions.  
@@ -46,15 +46,15 @@ We will see below how to create a patch compatible with **x86** (32 bits) and **
 But if you want to be sure to target only one platform, you can set the compatibility :
 
 	myPatch.Info.Compatibility = Platforms.All; // All platforms (set by default)
-	myPatch.Info.Compatibility = Platforms.x86; // 32bits
-	myPatch.Info.Compatibility = Platforms.x64; // 64bits
+	myPatch.Info.Compatibility = Platforms.x86; // 32 bits
+	myPatch.Info.Compatibility = Platforms.x64; // 64 bits
 
 ## Shared variables  ##
 
 A patch contains a list of variables.  
 They are shared between your application and the remote process. 
 
-	PatchDataVar var = new PatchDataVar(
+	PatchDataVar var = new PatchDataVar (
 		Platforms platforms (default = Platforms.All), 
 		VarType type, 
 		string name, 
@@ -73,7 +73,7 @@ For example :
 	// Will be loaded in 64 bits apps only
 	myPatch.Data.Vars.Add(new PatchDataVar(Platforms.x64, VarType.Numeric, "TestVar2")); 
 
-If the platform is not specified, variables will be loaded in 32bits and 64bits applications.  
+If the platform is not specified, variables will be loaded in 32 bits and 64 bits applications.  
 Except if you targeted the platform in the **Info.Compatibility** of your patch.  
 In the **DemoConsole** project, i created two variables.  
 I do not need to specify a platform because i targeted it in the patch info :
@@ -83,7 +83,7 @@ I do not need to specify a platform because i targeted it in the patch info :
     myPatch.Data.Vars.Add(new PatchDataVar(VarType.Numeric, "Flags", "Winmine__XP.exe+5194", null));
 
 The second important thing to know is the **expression** parameter.  
-If you leave it empty, like i done for my **MyFlagCounter** variable, SatsuiMemory will allocate space in the memory of the targeted process.  
+If you leave it empty, like i done for the **MyFlagCounter** variable, SatsuiMemory will allocate space in memory of the targeted process.  
 But if you set an expression value, like i done for the **Flags** variable, SatsuiMemory will read and write the memory at this place.  
 In a variable expression, you can use **module** name, **hexadecimal** value, and your **own variables** !
 
@@ -93,10 +93,10 @@ In a variable expression, you can use **module** name, **hexadecimal** value, an
 	// Will read and write at 'Winmine__XP.exe' module address
 	myPatch.Data.Vars.Add(new PatchDataVar(VarType.Numeric, "TestVar2", "Winmine__XP.exe", null));
 	
-	// Will read and write at $TestVar2 offset value
+	// Will convert the value of $TestVar2 to an offset and will read/write to it
 	myPatch.Data.Vars.Add(new PatchDataVar(VarType.Numeric, "TestVar3", "$TestVar2", null));
 	
-You can concatenate elements in a expression :
+You can concatenate elements in an expression :
 
 	myPatch.Data.Vars.Add(new PatchDataVar(VarType.Numeric, "TestVar4", "Winmine__XP.exe+$TestVar1+1000", null));
 
@@ -110,7 +110,7 @@ The description is still in progress !*
 *Coming soon.  
 The description is still in progress !*
 
-# I created a patch, how to use it now ? #
+# Well, i created a patch, how to use it now ? #
 
 Well, now you done the 'hard work', you juste have to use it !  
 
