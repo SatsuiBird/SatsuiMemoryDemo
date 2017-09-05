@@ -1,5 +1,3 @@
-**[ ! ] This description is in progress, come back later to get all informations [ ! ]**
-
 <p align="center">
   <img src="http://github.messatsu-dojo.com/previews/satsuimemory-1.png" alt="SatsuiMemory preview"/>
 </p>
@@ -102,35 +100,112 @@ You can concatenate elements in an expression :
 
 ## Hooks ##
 
-*Coming soon.  
-The description is still in progress !*
+In the **DemoConsole** project, for the Freeze timer function, i could have created a timer to set the variable **Flags** every seconds.  
+But instead, i created a hook to remove the code which decrease the flags count.  
+First you need to find the piece of code (using CheatEngine for example) doing it. Then, you replace it with your own function.  
+In the demo project the original code look like this :
+
+	8B 44 24 04 // move eax, [esp+04]
+	01 05 94 51 00 01 // add [01005194], eax
+
+This is the **AOB** of the patch.  
+Now, you need to write the code which will replace the AOB.  
+In the **DemoConsole** project, i decited to increment a shared variable. But in fact, you can choose to do nothing :
+
+	FF 05 [MyFlagCounter] // inc [MyFlagCounter]
+
+SatsuiMemory will replace **[MyFlagCounter]** with the right memory address because we declared it above as a shared variable.  
+The complete code look like this :
+
+	PatchHook hook = new PatchHook(
+		"Unlimited flags", // Name of the hook
+		"8B 44 24 04 01 05 94 51 00 01", // AOB
+		"FF 05 [MyFlagCounter]"); // My replacement code
+	myPatch.Hooks.Add(hook);
+
+This case is simple because the AOB never change, its always **move eax, [esp+04]**.  
+But imagine if the number 04 change everytime we start the game.  
+SatsuiMemory will not found the AOB and the hook will be rejected.  
+In this case we can replace unknown bytes by a **question mark** : 
+
+	8B 44 24 ?? // move eax, [esp+??]
+
+Okay, but i need to execute the original code before my own code, how to do it ?  
+You can use a special function in your remplacement code : **[aob:** (start) **:** (length) **]**  
+For example :
+
+	8B 44 24 [aob:3:1] // move eax, [esp+??]
+	
 
 ## Saving and loading a patch ##
 
-*Coming soon.  
-The description is still in progress !*
+Now you created and tested the patch, you can save and load it from a file using a **serializer**.  
+You can choose to serialize in two formats : **Xml** and **Binary** :
+
+	using SatsuiMemory.Serialization;
+	Serializer.SetDefaultFormat(SerializeFormat.Binary);
+ 
+Saving your patch :
+
+	myPatch.Save("my-patch-file." + Serializer.DefaultFileExtension);
+
+Loading your patch :
+
+	Patch myPatch = Patch.FromFile("my-patch-file." + Serializer.DefaultFileExtension);
+
+
 
 # Well, i created a patch, how to use it now ? #
 
-Well, now you done the 'hard work', you juste have to use it !  
+Well, now you done the 'hard work', you juste have to exploit it with a **MemApp** :  
 
 	MemApp myApp = new MemApp(myPatch);
 	myApp.OpenSync();
 	if (myApp.State == MemAppState.Opened)
 	{
 		// Play with memory :P
+		// Don't forget to close it after !
+		myApp.Close();
 	}
 	
-## Accessing and editing variables ##
+## Accessing and editing shared variables ##
 
-*Coming soon.  
-The description is still in progress !*
+To access a shared variable, you juste have to use the function **GetVar**, givint it the name of the variable :
+
+	MemDataVar myVar = myApp.Data.GetVar("Flags");
+	
+	int flagsCounter = Convert.ToInt32(myVar.Value); // Get the flags counter
+	myVar.Value = 999; // Set the flags counter to 999
+
 
 ## Enabling and disabling hooks ##
 
-*Coming soon.  
-The description is still in progress !*
+To enable a hook, you can use the property **IsEnabled** :
 
+	myApp.Hooks[0].IsEnabled = true; // Enable the first hook
+	myApp.Hooks[0].IsEnabled = false; // Disable the first hook
+
+## Closing the MemApp ##
+
+When you finished to play with the memory, don't forget to close the MemApp.  
+It will restore the targeted process as his original state.
+
+	myApp.Close(); // Important !
+
+## Memory cache ##
+
+For **huge programs**, it can take few moments for SatsuiMemory to find AOBs.  
+But you can use the cache system to do it faster.  
+You need to load the cache before opening the MemApp :  
+
+	MemApp myApp = new MemApp(myPatch);
+	myApp.Cache.Load("my-cache-file." + Serializer.DefaultFileExtension);
+
+Then before to close the MemApp, you can save the cache :
+	
+	myApp.Cache.Save("my-cache-file." + Serializer.DefaultFileExtension);
+	myApp.Close();
+	
 
 # My others projects #
 
